@@ -50,6 +50,15 @@ counted.
 
 ## Deployment (Render) issues
 
+### Service exits with status 127: `telemetry: command not found`
+Log shape: `==> Running 'telemetry & threat analysis honeypot'` — the
+**Start Command** field contains the service *name* (or any prose)
+instead of a real command; bash treats the `&` as "run in background"
+and then tries to execute the remaining words. Fix: paste the exact
+Gunicorn line from `Procfile` / `render.yaml` into Start Command
+(docs/DEPLOYMENT.md §4), then Manual Deploy. Option B: recreate the
+service via *New → Blueprint* so `render.yaml` fills in the commands.
+
 ### Build fails with dependency errors
 Confirm `requirements.txt` (not `requirement.txt`) is in the repo root
 and renders **Flask**, **gunicorn**, **psycopg2-binary**, etc.
