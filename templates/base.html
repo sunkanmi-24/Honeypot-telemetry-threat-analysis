@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Telemetry &amp; Threat Analysis{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Telemetry &amp; Threat Analysis <span class="tag">honeypot dashboard</span></div>
+    <nav>
+      <a href="{{ url_for('dashboard.index') }}">Home</a>
+      <a href="{{ url_for('dashboard.dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('dashboard.events') }}">Events</a>
+      <a href="{{ url_for('dashboard.export_jsonl') }}">Export JSONL</a>
+      <a href="{{ url_for('dashboard.export_csv') }}">Export CSV</a>
+      <a href="{{ url_for('dashboard.health') }}">Health</a>
+    </nav>
+  </header>
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="footer">
+    <p>Defensive research honeypot. All endpoint responses are controlled
+    fakes; no real services are exposed. Synthetic/test events are
+    labelled and excluded from observed-Internet statistics.</p>
+  </footer>
+</body>
+</html>

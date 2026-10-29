@@ -1,0 +1,25 @@
+# Example telemetry record (illustrative ONLY — this is not a real capture).
+# Real records are written to SQLite (telemetry.db) in local development
+# or PostgreSQL (DATABASE_URL) in production, and exported as JSONL via
+# /export/events.jsonl.
+#
+# {"event_id": "12345678901234567890-00000001-ab12cd34",
+#  "timestamp_utc": "2026-10-29T12:34:56.789012+00:00",
+#  "source_ip": "203.0.113.42",
+#  "method": "GET",
+#  "path": "/wp-login.php",
+#  "query_string": "",
+#  "user_agent": "Mozilla/5.0 (compatible; probe/1.0)",
+#  "referer": "",
+#  "host": "example-deployment.onrender.com",
+#  "status_code": 200,
+#  "response_size": 1456,
+#  "route_category": "cms",
+#  "classification": "Login endpoint probing",
+#  "mitre_technique": "T1110",
+#  "mitre_rationale": "Brute Force",
+#  "mitre_confidence": "low",
+#  "credential_user": 0,
+#  "credential_pass": 0,
+#  "synthetic": 0,
+#  "collector_version": "1.0.0"}

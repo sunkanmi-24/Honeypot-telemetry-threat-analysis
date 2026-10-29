@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Events — Telemetry &amp; Threat Analysis{% endblock %}
+{% block content %}
+<h1>Recorded Events</h1>
+
+<form class="filters" method="get" action="/dashboard/events">
+  <label>View
+    <select name="view">
+      <option value="observed" {{ 'selected' if mode == 'observed' }}>Observed only (non-synthetic)</option>
+      <option value="synthetic" {{ 'selected' if mode == 'synthetic' }}>Synthetic/test only</option>
+      <option value="all" {{ 'selected' if mode == 'all' }}>All events</option>
+    </select>
+  </label>
+  <label>From (UTC) <input type="date" name="from" value="{{ dates.from or '' }}"></label>
+  <label>To (UTC) <input type="date" name="to" value="{{ dates.to or '' }}"></label>
+  <label>Source IP <input type="text" name="source_ip" value="{{ source_ip_filter }}"></label>
+  <label>Classification
+    <select name="classification">
+      <option value="">Any</option>
+      {% for c in classifications %}{% if c != 'unknown' %}
+      <option value="{{ c }}" {{ 'selected' if classification_filter == c }}>{{ c }}</option>
+      {% endif %}{% endfor %}
+    </select>
+  </label>
+  <button type="submit">Apply</button>
+</form>
+
+<p class="muted">{{ total }} matching event(s). Page {{ page }} of {{ pages }}.</p>
+
+{% if rows %}
+<section class="section">
+<table class="events-table">
+  <tr><th>Time (UTC)</th><th>Source IP</th><th>Method</th><th>Path</th>
+      <th>Query</th><th>Status</th><th>Size</th><th>Classification</th>
+      <th>MITRE</th><th>Creds?</th><th>Synth?</th></tr>
+  {% for e in rows %}
+    <tr>
+      <td>{{ e.timestamp_utc }}</td>
+      <td>{{ e.source_ip or 'unknown' }}</td>
+      <td>{{ e.method }}</td>
+      <td class="wrap">{{ e.path }}</td>
+      <td class="wrap">{{ e.query_string }}</td>
+      <td>{{ e.status_code }}</td>
+      <td>{{ e.response_size if e.response_size is not none else '—' }}</td>
+      <td>{{ e.classification }}</td>
+      <td>{{ e.mitre_technique or '—' }}</td>
+      <td>{{ 'user' if e.credential_user else '' }}{{ 'pass' if e.credential_pass else '' }}{{ '—' if not (e.credential_user or e.credential_pass) }}</td>
+      <td>{{ 'yes' if e.synthetic else 'no' }}</td>
+    </tr>
+  {% endfor %}
+</table>
+</section>
+<nav class="pagination">
+  {% if page > 1 %}<a href="/dashboard/events?view={{ mode }}&page={{ page - 1 }}&from={{ dates.from or '' }}&to={{ dates.to or '' }}">&larr; newer</a>{% endif %}
+  {% if page < pages %}<a href="/dashboard/events?view={{ mode }}&page={{ page + 1 }}&from={{ dates.from or '' }}&to={{ dates.to or '' }}">older &rarr;</a>{% endif %}
+</nav>
+{% else %}
+<section class="empty">
+  <h2>No events match</h2>
+  <p>No events match the current filters. Nothing is simulated here: when
+  there is no data, the dashboard and exports show no events.</p>
+</section>
+{% endif %}
+{% endblock %}

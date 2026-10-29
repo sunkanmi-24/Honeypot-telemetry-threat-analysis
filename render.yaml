@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: telemetry-threat-analysis
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    # $PORT is assigned by Render; never run the Flask dev server here.
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 60 --access-logfile - --error-logfile -
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      # IMPORTANT: the number of reverse proxies Render places in front of
+      # the app. VERIFY this value against your Render plan's documented
+      # proxy setup before the observation period (see docs/DEPLOYMENT.md).
+      # 1 is the correct value once verified on Render's standard web
+      # service; while unverified keep 0 and treat recorded IPs as proxy
+      # addresses.
+      - key: PROXY_TRUSTED_HOPS
+        value: 1
+      # Queue dashboard/export view states through the proxy correctly.
+      - key: MARK_LOCAL_SYNTHETIC
+        value: 1
+      # Use a managed PostgreSQL instance when one is attached; leave
+      # unset only if you attach a persistent disk for SQLite instead.
+      - key: DATABASE_URL
+        sync: false  # set this from your Render PostgreSQL database dashboard
+    # OPTIONAL (paid): uncomment to keep SQLite telemetry on a persistent
+    # disk instead of a managed database, and set DATA_DIR accordingly.
+    # disk:
+    #   name: telemetry-data
+    #   mountPath: /var/data
+    #   sizeGB: 1

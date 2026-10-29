@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — Telemetry &amp; Threat Analysis{% endblock %}
+{% block content %}
+<h1>Telemetry Dashboard</h1>
+
+<form class="filters" method="get" action="/dashboard">
+  <label>View
+    <select name="view">
+      <option value="observed" {{ 'selected' if mode == 'observed' }}>Observed only (non-synthetic)</option>
+      <option value="synthetic" {{ 'selected' if mode == 'synthetic' }}>Synthetic/test only</option>
+      <option value="all" {{ 'selected' if mode == 'all' }}>All events</option>
+    </select>
+  </label>
+  <label>From (UTC) <input type="date" name="from" value="{{ dates.from or '' }}"></label>
+  <label>To (UTC) <input type="date" name="to" value="{{ dates.to or '' }}"></label>
+  <button type="submit">Apply</button>
+</form>
+
+{% if summary.total_events == 0 %}
+<section class="empty">
+  <h2>No telemetry yet</h2>
+  <p>No events are stored with the selected filters. Data appears here as
+  soon as requests are collected. Figures in this dashboard always come
+  from the stored telemetry — nothing is pre-populated or simulated.</p>
+</section>
+{% else %}
+<section class="cards">
+  <div class="card"><h3>Total requests</h3><div class="number">{{ summary.total_events }}</div></div>
+  <div class="card"><h3>Unique source IPs</h3><div class="number">{{ summary.unique_source_ips }}</div></div>
+  <div class="card"><h3>Non-synthetic discovery events</h3><div class="number">{{ summary.discovery_events }}</div></div>
+  <div class="card"><h3>Synthetic test events</h3><div class="number muted-number">{{ summary.synthetic_events }}</div></div>
+</section>
+<section class="meta">
+  <p><strong>First observed:</strong> {{ summary.first_observed or '—' }} &nbsp;•&nbsp;
+     <strong>Last observed:</strong> {{ summary.last_observed or '—' }} (UTC)</p>
+  <p class="muted">Synthetic events are local/test traffic and are excluded
+  from observed-Internet statistics.</p>
+</section>
+
+<section class="section"><h2>Requests over time (UTC date)</h2>
+  <table><tr><th>Date</th><th>Requests</th></tr>
+  {% for day, n in over_time %}
+    <tr><td>{{ day }}</td><td>{{ n }}</td></tr>
+  {% else %}
+    <tr><td colspan="2" class="muted">No data</td></tr>
+  {% endfor %}
+  </table>
+</section>
+
+<section class="section"><h2>Top requested routes</h2>
+  <table><tr><th>Route</th><th>Requests</th></tr>
+  {% for value, n in top_routes %}
+    <tr><td>{{ value }}</td><td>{{ n }}</td></tr>
+  {% else %}<tr><td colspan="2" class="muted">No data</td></tr>{% endfor %}
+  </table>
+</section>
+
+<section class="section"><h2>HTTP method distribution</h2>
+  <table><tr><th>Method</th><th>Requests</th></tr>
+  {% for value, n in methods %}
+    <tr><td>{{ value }}</td><td>{{ n }}</td></tr>
+  {% else %}<tr><td colspan="2" class="muted">No data</td></tr>{% endfor %}
+  </table>
+</section>
+
+<section class="section"><h2>HTTP status code distribution</h2>
+  <table><tr><th>Status</th><th>Requests</th></tr>
+  {% for value, n in statuses %}
+    <tr><td>{{ value }}</td><td>{{ n }}</td></tr>
+  {% else %}<tr><td colspan="2" class="muted">No data</td></tr>{% endfor %}
+  </table>
+</section>
+
+<section class="section"><h2>Top User-Agents</h2>
+  <table><tr><th>User-Agent</th><th>Requests</th></tr>
+  {% for value, n in user_agents %}
+      <tr><td class="wrap">{{ value }}</td><td>{{ n }}</td></tr>
+  {% else %}<tr><td colspan="2" class="muted">No data</td></tr>{% endfor %}
+  </table>
+</section>
+
+<section class="section"><h2>Behavioral classification</h2>
+  <table><tr><th>Classification</th><th>Requests</th></tr>
+  {% for value, n in classifications %}
+    <tr><td>{{ value }}</td><td>{{ n }}</td></tr>
+  {% else %}<tr><td colspan="2" class="muted">No data</td></tr>{% endfor %}
+  </table>
+</section>
+
+<section class="section"><h2>Repeated requests by source IP</h2>
+  <table><tr><th>Source IP</th><th>Requests</th></tr>
+  {% for value, n in repeated_ips %}
+    <tr><td>{{ value }}</td><td>{{ n }}</td></tr>
+  {% else %}<tr><td colspan="2" class="muted">No source repeated requests yet</td></tr>{% endfor %}
+  </table>
+</section>
+
+<section class="section"><h2>MITRE ATT&amp;CK mappings (qualified, evidence-based)</h2>
+  <table><tr><th>Technique</th><th>Mapped events</th></tr>
+  {% for value, n in mitre %}
+    <tr><td>{{ value }}</td><td>{{ n }}</td></tr>
+  {% else %}<tr><td colspan="2" class="muted">No mapped events</td></tr>{% endfor %}
+  </table>
+  <p class="muted">Mappings are qualified inferences, not proof; see
+  <code>docs/MITRE_MAPPING.md</code> for evidence rules and limitations.</p>
+</section>
+
+{% if geoip_enabled %}
+<section class="section"><h2>Country / region distribution</h2>
+  <table><tr><th>Country</th><th>Requests</th></tr>
+  {% for value, n in countries %}
+    <tr><td>{{ value }}</td><td>{{ n }}</td></tr>
+  {% else %}<tr><td colspan="2" class="muted">No data</td></tr>{% endfor %}
+  </table>
+</section>
+{% else %}
+<section class="section"><h2>Country / region distribution</h2>
+  <p class="muted">Geographic enrichment is disabled. Countries are never
+  guessed; enable a documented GeoIP source (see
+  <code>docs/ARCHITECTURE.md</code>) to populate this section.</p>
+</section>
+{% endif %}
+
+<section class="section"><h2>Recent events</h2>
+  <table>
+    <tr><th>Time (UTC)</th><th>Source</th><th>Method</th><th>Path</th>
+        <th>Status</th><th>Classification</th><th>Synthetic</th></tr>
+    {% for e in recent_events %}
+      <tr>
+        <td>{{ e.timestamp_utc }}</td><td>{{ e.source_ip or 'unknown' }}</td>
+        <td>{{ e.method }}</td><td>{{ e.path }}</td>
+        <td>{{ e.status_code }}</td><td>{{ e.classification }}</td>
+        <td>{{ 'yes' if e.synthetic else 'no' }}</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="7" class="muted">No events</td></tr>
+    {% endfor %}
+  </table>
+  <p><a href="/dashboard/events?view={{ mode }}">Browse all events (paginated)</a></p>
+</section>
+{% endif %}
+{% endblock %}

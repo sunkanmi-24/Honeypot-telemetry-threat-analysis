@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Telemetry &amp; Threat Analysis Honeypot{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>Telemetry &amp; Threat Analysis Honeypot</h1>
+  <p>
+    This service is a <strong>defensive, low-interaction HTTP honeypot</strong>
+    used for a telemetry and threat-analysis study. It presents deliberately
+    decoy endpoints that resemble commonly probed administrative pages,
+    configuration files, and diagnostic interfaces. Every endpoint returns a
+    controlled fake response or a suitable error code.
+  </p>
+  <p class="muted">
+    There is nothing to log in to, nothing to download, and nothing to
+    exploit here. Requests are recorded as structured telemetry for
+    defensive research. If you reached this host by mistake, simply close
+    this page.
+  </p>
+  <p>
+    <a class="button" href="/dashboard">Research dashboard</a>
+  </p>
+</section>
+{% endblock %}
