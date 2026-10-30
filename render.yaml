@@ -20,10 +20,12 @@ services:
       # Queue dashboard/export view states through the proxy correctly.
       - key: MARK_LOCAL_SYNTHETIC
         value: 1
-      # Use a managed PostgreSQL instance when one is attached; leave
-      # unset only if you attach a persistent disk for SQLite instead.
+      # Use a managed PostgreSQL instance when one is attached; Supabase
+      # is the recommended provider for this project (Postgres-based).
+      # Set this from the Supabase dashboard connection string when using
+      # Supabase; leave unset only if using a persistent disk instead.
       - key: DATABASE_URL
-        sync: false  # set this from your Render PostgreSQL database dashboard
+        sync: false  # set this from your managed PostgreSQL provider (e.g. Supabase)
     # OPTIONAL (paid): uncomment to keep SQLite telemetry on a persistent
     # disk instead of a managed database, and set DATA_DIR accordingly.
     # disk:

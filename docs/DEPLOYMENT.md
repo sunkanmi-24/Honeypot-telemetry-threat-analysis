@@ -32,16 +32,28 @@ git push -u origin main
 `telemetry.jsonl`, exports, and local backups. Never commit real
 credentials.
 
-## 3. Storage decision (important for a 96-hour experiment)
+## 3. Storage decision (important for a 96-hour observation window)
 
 Render's **free web services have an EPHEMERAL filesystem**: a restart
 or redeploy wipes local files. This matters because SQLite lives on disk.
 
 | Option | Plan needed | Persistence | Recommendation |
 |---|---|---|---|
-| Managed PostgreSQL (`DATABASE_URL`) | Render Postgres (free instance exists but expires after ~30 days; paid persists) | survives restarts/redeploys | **best for the observation** |
-| SQLite + Render persistent disk | requires a paid instance type with disk support | survives restarts | acceptable alternative |
+| **Supabase PostgreSQL** (managed) | Supabase free tier (or paid) | survives restarts/redeploys of the web service | **Recommended for this project now** |
+| Render PostgreSQL | Render Postgres | survives restarts/redeploys | Equivalent option (also fine) |
+| SQLite + Render persistent disk | paid plan | survives restarts | acceptable alternative |
 | SQLite on free web service | free | **NO** — data loss on restart | only for local-style trials |
+
+### Using **Supabase** as the managed database (recommended now)
+
+1. Create a Supabase project (dashboard: *New → Project*). Use the free tier.
+2. Copy the **PostgreSQL connection string** from Supabase → Database → Connection.
+   Typical format: `postgresql://postgres:YOUR_PASSWORD@db.abcdefgh.supabase.co:5432/postgres?sslmode=require`
+3. Set it as an environment variable on the Render web service:
+   - Key: `DATABASE_URL`
+   - Value: the full connection string (keep `?sslmode=require` — managed Postgres providers require SSL).
+4. The application automatically detects the `postgresql://` / `postgres://` prefix and uses the PostgreSQL backend.
+5. The free tier is sufficient for this study's expected volume; monitor usage during observation.
 
 **Option A — PostgreSQL (recommended):**
 1. In Render: *New → PostgreSQL*. Choose the plan; note the region
@@ -72,7 +84,7 @@ block (paid plan required) and set env var `DATA_DIR=/var/data`.
 | `PYTHON_VERSION` | `3.11.9` | set by `render.yaml` |
 | `PROXY_TRUSTED_HOPS` | `1` | See section 6 — verify before trusting IPs |
 | `MARK_LOCAL_SYNTHETIC` | `1` | local/loopback events flagged synthetic |
-| `DATABASE_URL` | *(paste internal Postgres URL)* | leave unset only with Option B |
+| `DATABASE_URL` | *(paste managed Postgres URL, e.g. Supabase)* | with `?sslmode=require` for Supabase; leave unset only with Option B |
 | `DATA_DIR` | `/var/data` | Option B only |
 | `GEOIP_DB_PATH` | *(unset)* | optional; leave unset to keep countries "unknown" |
 
@@ -107,8 +119,8 @@ proxy observed (render.yaml documents this and the caveat). Verify it:
   of seconds to start on the next request; the plan also restarts
   periodically. Log every restart/redeploy in the observation log —
   downtime rows are required by `docs/OBSERVATION_PLAN.md`.
-- Free PostgreSQL instances may expire after ~30 days — deploy,
-  observe, export data before expiry, and export after the window.
+- Free PostgreSQL instances (including Supabase free tier) may expire
+  or reset — export data before the window ends.
 - The first request after sleep still works on `/health` but the
   dashboard's first load can be slow; this is expected and should be
   recorded, not hidden.

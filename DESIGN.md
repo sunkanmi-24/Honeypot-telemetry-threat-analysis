@@ -12,7 +12,7 @@ package. Gunicorn is production standard WSGI for Render; binds
 `0.0.0.0:$PORT`. Flask's dev server stays for local Windows use only,
 with `debug` opt-in via `python app.py --debug`.
 
-## 2. Storage: SQLite → PostgreSQL behind one store class
+## 2. Storage: SQLite → PostgreSQL (managed via Supabase) behind one store class
 
 JSONL (the prototype's storage) is fragile for concurrent writers and
 has no indexes. But a managed database was not yet configured, so

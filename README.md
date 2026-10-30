@@ -11,7 +11,8 @@ MITRE-mapped threat report.
 
 - ✅ Local application runs; **67 tests pass** (`python -m pytest -q`).
 - ✅ Dashboard, exports, classification, MITRE mapping, client-IP
-      handling, SQLite/PostgreSQL storage.
+      handling, SQLite/**PostgreSQL via Supabase** (managed), storage,
+      tests, analysis.
 - ✅ Render deployment configuration is prepared (see below).
 - ⏳ **Not yet deployed** — deployment requires your Render account;
       follow `docs/DEPLOYMENT.md`.
