@@ -11,6 +11,11 @@ data/
 .env
 *.log
 exports/
+reports/summary.json
+reports/tables/*.csv
 reports/figures/*.png
+reports/figures/
 !reports/figures/.gitkeep
+reports/tables/
+!reports/tables/.gitkeep
 backup/
